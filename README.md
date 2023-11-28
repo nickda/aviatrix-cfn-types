@@ -92,6 +92,8 @@ To submit resources one at a time:
 ```sh
 python3 submit <resource-name>
 ```
+You have to specify the resource names in the Cloudformation resource format (TF::Aviatrix:Resource).
+To find the list of available resources check the generated documentation or the `resources` folder. (these folders are generated in step 4)
 
 e.g.,
 

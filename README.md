@@ -1,11 +1,11 @@
 # Custom Cloudformation Resources for Aviatrix
 
-## 1. Start by deploying the execution environment from template.yml to Cloudformation in the region where resources will be deployed
+## 1. Deploy the execution environment
 
 Start by deploying the execution environment from [template.yml](https://github.com/nickda/aviatrix-cfn-types/blob/main/template.yml) to Cloudformation.
 >Important: Ensure you select the correct region in the AWS Console or AWS CLI.
 
-## 2. Install the prerequisites to generate Cloudformation Resources from Aviatrix Terraform Provider resources
+## 2. Install the prerequisites to generate Cloudformation Resources from Aviatrix Terraform provider resources
 
 - Python 3
 - Git

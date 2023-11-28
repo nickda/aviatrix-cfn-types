@@ -1,0 +1,719 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Aviatrix Systems - <BYOL> - Creates the necessary IAM policies, roles, security group and launches Aviatrix Controller EC2 instance.",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Network Configuration"
+                    },
+                    "Parameters": [
+                        "VPCParam",
+                        "SubnetParam",
+                        "AllowedHttpsIngressIpParam"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Amazon EC2 Configuration"
+                    },
+                    "Parameters": [
+                        "InstanceTypeParam"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "IAM role creation"
+                    },
+                    "Parameters": [
+                        "IAMRoleParam"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "VPCParam": {
+                    "default": "Which VPC should the Aviatrix Controller be deployed in?"
+                },
+                "SubnetParam": {
+                    "default": "Which public subnet in the VPC?"
+                },
+                "AllowedHttpsIngressIpParam": {
+                    "default": "IPv4 IP address that is allowed to access your Aviatrix Controller via HTTP 443"
+                },
+                "IAMRoleParam": {
+                    "default": "Select New if Aviatrix IAM role has not been created (first time launch). Select aviatrix-role-ec2 if there is already Aviatrix IAM role created"
+                },
+                "InstanceTypeParam": {
+                    "default": "Select Controller Size"
+                }
+            }
+        }
+    },
+    "Parameters": {
+        "VPCParam": {
+            "Type": "AWS::EC2::VPC::Id",
+            "Description": "Select Your VPC"
+        },
+        "SubnetParam": {
+            "Type": "AWS::EC2::Subnet::Id",
+            "Description": "Aviatrix Controller must be launched on a Public Subnet"
+        },
+        "AllowedHttpsIngressIpParam": {
+            "Type": "String",
+            "Description": "Enter an IPv4 IP address that is allowed to access your Aviatrix Controller via HTTP 443",
+            "Default": "172.0.0.1/32"
+        },
+        "IAMRoleParam": {
+            "Description": "Determine if IAM roles aviatrix-role-ec2 and aviatrix-role-app should be created.",
+            "Default": "New",
+            "Type": "String",
+            "AllowedValues": [
+                "aviatrix-role-ec2",
+                "New"
+            ]
+        },
+        "InstanceTypeParam": {
+            "Type": "String",
+            "Default": "t3.large",
+            "AllowedValues": [
+                "t2.large",
+                "t2.xlarge",
+                "t2.2xlarge",
+                "t3.large",
+                "t3.xlarge",
+                "t3.2xlarge",
+                "c4.large",
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c5.large",
+                "c5.xlarge",
+                "c5.2xlarge",
+                "c5n.large",
+                "c5n.xlarge",
+                "c5n.2xlarge",
+                "c5n.4xlarge",
+                "c5n.9xlarge",
+                "c5n.18xlarge"
+            ],
+            "Description": "Select an instance size for the controller. Default is t3.large"
+        }
+    },
+    "Conditions": {
+        "AviatrixIAMRoleNotExist": {
+            "Fn::Equals": [
+                {
+                    "Ref": "IAMRoleParam"
+                },
+                "New"
+            ]
+        },
+        "T2SeriesTrue": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "InstanceTypeParam"
+                        },
+                        "t2.large"
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "InstanceTypeParam"
+                        },
+                        "t2.xlarge"
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "InstanceTypeParam"
+                        },
+                        "t2.2xlarge"
+                    ]
+                }
+            ]
+        }
+    },
+    "Mappings": {
+        "RegionMap": {
+            "us-east-1": {
+                "Name": "ami-03c5c2226878f03c4",
+                "Alias": "Virginia"
+            },
+            "us-gov-east-1": {
+                "Name": "ami-0eca8c31aa354988b",
+                "Alias": "AWS Gov East 1"
+            },
+            "us-gov-west-1": {
+                "Name": "ami-0961859c1f17d2321",
+                "Alias": "AWS Gov West 1"
+            },
+            "us-east-2": {
+                "Name": "ami-0acedd29dab20cc5a",
+                "Alias": "Virginia"
+            },
+            "us-west-1": {
+                "Name": "ami-08bddc6d2c4743e08",
+                "Alias": "Virginia"
+            },
+            "us-west-2": {
+                "Name": "ami-07589d8f6f9df39a3",
+                "Alias": "Virginia"
+            },
+            "ca-central-1": {
+                "Name": "ami-066d9e51da6575698",
+                "Alias": "Virginia"
+            },
+            "eu-central-1": {
+                "Name": "ami-0df4b7dd07ca5a85b",
+                "Alias": "Virginia"
+            },
+            "eu-west-1": {
+                "Name": "ami-0292c023568445ff0",
+                "Alias": "Virginia"
+            },
+            "eu-west-2": {
+                "Name": "ami-009f45004487589fd",
+                "Alias": "Virginia"
+            },
+            "eu-west-3": {
+                "Name": "ami-0eddef65825d7c1f7",
+                "Alias": "Virginia"
+            },
+            "eu-north-1": {
+                "Name": "ami-080b59777d2471220",
+                "Alias": "Virginia"
+            },
+            "eu-south-1": {
+                "Name": "ami-0967010ee1ae2ff24",
+                "Alias": "Virginia"
+            },
+            "ap-east-1": {
+                "Name": "ami-06566c7298b19784a",
+                "Alias": "Virginia"
+            },
+            "ap-southeast-1": {
+                "Name": "ami-021b816de63d532a0",
+                "Alias": "Virginia"
+            },
+            "ap-southeast-2": {
+                "Name": "ami-01310952d47fb2db7",
+                "Alias": "Virginia"
+            },
+            "ap-southeast-3": {
+                "Name": "ami-01a27f6091c2e1e8e",
+                "Alias": "Virginia"
+            },
+            "ap-south-1": {
+                "Name": "ami-0b9f3c76193b82ef2",
+                "Alias": "Virginia"
+            },
+            "ap-northeast-1": {
+                "Name": "ami-08e2eb00ef2cdc3e8",
+                "Alias": "Virginia"
+            },
+            "ap-northeast-2": {
+                "Name": "ami-0379d9fa2ddcec135",
+                "Alias": "Virginia"
+            },
+            "ap-northeast-3": {
+                "Name": "ami-0330539f19a42d89d",
+                "Alias": "Virginia"
+            },
+            "sa-east-1": {
+                "Name": "ami-052d101930a7a14f5",
+                "Alias": "Virginia"
+            },
+            "me-south-1": {
+                "Name": "ami-0a489770467eb83ba",
+                "Alias": "Virginia"
+            },
+            "af-south-1": {
+                "Name": "ami-0ce3c6a5aba120b62",
+                "Alias": "Virginia"
+            }
+        }
+    },
+    "Resources": {
+        "AviatrixRoleEC2": {
+            "Type": "AWS::IAM::Role",
+            "DeletionPolicy": "Retain",
+            "Condition": "AviatrixIAMRoleNotExist",
+            "Properties": {
+                "RoleName": "aviatrix-role-ec2",
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/"
+            }
+        },
+        "AviatrixRoleApp": {
+            "Type": "AWS::IAM::Role",
+            "DeletionPolicy": "Retain",
+            "Condition": "AviatrixIAMRoleNotExist",
+            "Properties": {
+                "RoleName": "aviatrix-role-app",
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": [
+                                    {
+                                        "Fn::Join": [
+                                            "",
+                                            [
+                                                "arn:",
+                                                {
+                                                    "Ref": "AWS::Partition"
+                                                },
+                                                ":iam::",
+                                                {
+                                                    "Ref": "AWS::AccountId"
+                                                },
+                                                ":root"
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/"
+            }
+        },
+        "CreateAviatrixAssumeRolePolicy": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "DeletionPolicy": "Retain",
+            "Condition": "AviatrixIAMRoleNotExist",
+            "Properties": {
+                "ManagedPolicyName": "aviatrix-assume-role-policy",
+                "Description": "Policy for creating aviatrix-assume-role-policy",
+                "Path": "/",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Resource": {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "arn:",
+                                        {
+                                            "Ref": "AWS::Partition"
+                                        },
+                                        ":iam::*:role/aviatrix-*"
+                                    ]
+                                ]
+                            }
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "aws-marketplace:MeterUsage",
+                                "s3:GetBucketLocation"
+                            ],
+                            "Resource": "*"
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "AviatrixRoleEC2"
+                    }
+                ]
+            }
+        },
+        "CreateAviatrixAppPolicy": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "DeletionPolicy": "Retain",
+            "Condition": "AviatrixIAMRoleNotExist",
+            "Properties": {
+                "ManagedPolicyName": "aviatrix-app-policy",
+                "Description": "Policy for creating aviatrix-app-policy",
+                "Path": "/",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "ec2:Describe*",
+                                "ec2:Get*",
+                                "ec2:Search*",
+                                "elasticloadbalancing:Describe*",
+                                "route53:List*",
+                                "route53:Get*",
+                                "sqs:Get*",
+                                "sqs:List*",
+                                "sns:List*",
+                                "s3:List*",
+                                "s3:Get*",
+                                "iam:List*",
+                                "iam:Get*",
+                                "directconnect:Describe*",
+                                "guardduty:Get*",
+                                "guardduty:List*",
+                                "ram:Get*",
+                                "ram:List*",
+                                "networkmanager:Get*",
+                                "networkmanager:List*"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "ec2:CreateVpc",
+                                "ec2:DeleteVpc",
+                                "ec2:ModifyVpcAttribute",
+                                "ec2:CreateNetworkAclEntry",
+                                "ec2:ReplaceNetworkAclEntry",
+                                "ec2:DeleteNetworkAclEntry",
+                                "ec2:AssociateVpcCidrBlock",
+                                "ec2:AssociateSubnetCidrBlock",
+                                "ec2:CreateSubnet",
+                                "ec2:DeleteSubnet",
+                                "ec2:ModifySubnetAttribute",
+                                "ec2:*InternetGateway*",
+                                "ec2:*Route*",
+                                "ec2:*Instance*",
+                                "ec2:*SecurityGroup*",
+                                "ec2:*Address*",
+                                "ec2:*NetworkInterface*",
+                                "ec2:CreateKeyPair",
+                                "ec2:DeleteKeyPair",
+                                "ec2:CreateTags",
+                                "ec2:DeleteTags"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "ec2:CreateCustomerGateway",
+                                "ec2:DeleteCustomerGateway",
+                                "ec2:CreateVpnConnection",
+                                "ec2:DeleteVpnConnection",
+                                "ec2:CreateVpcPeeringConnection",
+                                "ec2:AcceptVpcPeeringConnection",
+                                "ec2:DeleteVpcPeeringConnection",
+                                "ec2:EnableVgwRoutePropagation",
+                                "ec2:DisableVgwRoutePropagation"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "ec2:AssociateTransitGatewayRouteTable",
+                                "ec2:AcceptTransitGatewayVpcAttachment",
+                                "ec2:CreateTransitGateway",
+                                "ec2:CreateTransitGatewayRoute",
+                                "ec2:CreateTransitGatewayRouteTable",
+                                "ec2:CreateTransitGatewayVpcAttachment",
+                                "ec2:DeleteTransitGateway",
+                                "ec2:DeleteTransitGatewayRoute",
+                                "ec2:DeleteTransitGatewayRouteTable",
+                                "ec2:DeleteTransitGatewayVpcAttachment",
+                                "ec2:DisableTransitGatewayRouteTablePropagation",
+                                "ec2:DisassociateTransitGatewayRouteTable",
+                                "ec2:EnableTransitGatewayRouteTablePropagation",
+                                "ec2:ExportTransitGatewayRoutes",
+                                "ec2:ModifyTransitGatewayVpcAttachment",
+                                "ec2:RejectTransitGatewayVpcAttachment",
+                                "ec2:ReplaceTransitGatewayRoute",
+                                "ec2:EnableRoutePropagation"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "ram:CreateResourceShare",
+                                "ram:DeleteResourceShare",
+                                "ram:UpdateResourceShare",
+                                "ram:AssociateResourceShare",
+                                "ram:DisassociateResourceShare",
+                                "ram:TagResource",
+                                "ram:UntagResource",
+                                "ram:AcceptResourceShareInvitation",
+                                "ram:EnableSharingWithAwsOrganization"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "directconnect:CreateDirectConnectGateway",
+                                "directconnect:CreateDirectConnectGatewayAssociation",
+                                "directconnect:CreateDirectConnectGatewayAssociationProposal",
+                                "directconnect:DeleteDirectConnectGateway",
+                                "directconnect:DeleteDirectConnectGatewayAssociation",
+                                "directconnect:DeleteDirectConnectGatewayAssociationProposal",
+                                "directconnect:AcceptDirectConnectGatewayAssociationProposal"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "sqs:AddPermission",
+                                "sqs:ChangeMessageVisibility",
+                                "sqs:CreateQueue",
+                                "sqs:DeleteMessage",
+                                "sqs:DeleteQueue",
+                                "sqs:PurgeQueue",
+                                "sqs:ReceiveMessage",
+                                "sqs:RemovePermission",
+                                "sqs:SendMessage",
+                                "sqs:SetQueueAttributes",
+                                "sqs:TagQueue"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:CreateBucket",
+                                "s3:DeleteBucket",
+                                "s3:ListBucket",
+                                "s3:PutObject",
+                                "s3:DeleteObject"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "iam:PassRole",
+                                "iam:AddRoleToInstanceProfile",
+                                "iam:CreateInstanceProfile",
+                                "iam:DeleteInstanceProfile",
+                                "iam:RemoveRoleFromInstanceProfile",
+                                "iam:CreateServiceLinkedRole"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "iam:DeletePolicyVersion",
+                                "iam:CreatePolicyVersion"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "elasticloadbalancing:*",
+                                "route53:ChangeResourceRecordSets",
+                                "ec2:*Volume*",
+                                "ec2:*Snapshot*",
+                                "ec2:*TransitGatewayPeeringAttachment",
+                                "guardduty:*",
+                                "globalaccelerator:*",
+                                "networkmanager:*"
+                            ],
+                            "Resource": "*"
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "AviatrixRoleApp"
+                    }
+                ]
+            }
+        },
+        "AviatrixInstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "DeletionPolicy": "Retain",
+            "Condition": "AviatrixIAMRoleNotExist",
+            "Properties": {
+                "Path": "/",
+                "InstanceProfileName": "aviatrix-role-ec2",
+                "Roles": [
+                    {
+                        "Ref": "AviatrixRoleEC2"
+                    }
+                ]
+            }
+        },
+        "AviatrixController": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "RegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "Name"
+                    ]
+                },
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeSize": "64",
+                            "VolumeType": "gp2",
+                            "Encrypted": "true"
+                        }
+                    }
+                ],
+                "DisableApiTermination": "true",
+                "InstanceType": {
+                    "Ref": "InstanceTypeParam"
+                },
+                "IamInstanceProfile": "aviatrix-role-ec2",
+                "NetworkInterfaces": [
+                    {
+                        "DeviceIndex": "0",
+                        "GroupSet": [
+                            {
+                                "Ref": "AviatrixSG"
+                            }
+                        ],
+                        "SubnetId": {
+                            "Ref": "SubnetParam"
+                        }
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash -ex",
+                                "\n",
+                                "sudo service ssh stop",
+                                "\n"
+                            ]
+                        ]
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "AviatrixController"
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": "Aviatrix"
+                    }
+                ]
+            }
+        },
+        "AviatrixEIP": {
+            "Type": "AWS::EC2::EIP",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "InstanceId": {
+                    "Ref": "AviatrixController"
+                },
+                "Domain": "vpc"
+            }
+        },
+        "AviatrixSG": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Aviatrix - Allow HTTPS to Controller",
+                "VpcId": {
+                    "Ref": "VPCParam"
+                },
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "CidrIp": {
+                            "Ref": "AllowedHttpsIngressIpParam"
+                        },
+                        "FromPort": "443",
+                        "ToPort": "443"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "AviatrixSecurityGroup"
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": "Aviatrix"
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "AccountId": {
+            "Description": "Amazon Account ID",
+            "Value": {
+                "Ref": "AWS::AccountId"
+            }
+        },
+        "AviatrixRoleAppARN": {
+            "Description": "AviatrixRoleApp ARN",
+            "Condition": "AviatrixIAMRoleNotExist",
+            "Value": {
+                "Fn::GetAtt": [
+                    "AviatrixRoleApp",
+                    "Arn"
+                ]
+            }
+        },
+        "AviatrixRoleEC2ARN": {
+            "Description": "AviatrixRoleEC2 ARN",
+            "Condition": "AviatrixIAMRoleNotExist",
+            "Value": {
+                "Fn::GetAtt": [
+                    "AviatrixRoleEC2",
+                    "Arn"
+                ]
+            }
+        },
+        "AviatrixControllerEIP": {
+            "Description": "AviatrixController External IP",
+            "Value": {
+                "Fn::GetAtt": [
+                    "AviatrixController",
+                    "PublicIp"
+                ]
+            }
+        },
+        "AviatrixControllerPrivateIP": {
+            "Description": "AviatrixController Private IP",
+            "Value": {
+                "Fn::GetAtt": [
+                    "AviatrixController",
+                    "PrivateIp"
+                ]
+            }
+        }
+    }
+}

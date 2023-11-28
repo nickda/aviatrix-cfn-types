@@ -1,0 +1,182 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy an Aviatrix account using TF::Aviatrix::Account
+
+Metadata: 
+  AWS::CloudFormation::Interface: 
+    ParameterGroups: 
+      - 
+        Label: 
+          default: "AWS Account Information"
+        Parameters: 
+          - AccountName
+          - AwsAccountNumber
+          - AwsAccessKey
+          - AwsSecretKey
+      - 
+        Label: 
+          default: "Infrastructure Configuration"
+        Parameters: 
+          - Region
+          - TransitCidr
+          - Spoke1Cidr
+          - Spoke2Cidr
+    ParameterLabels: 
+      AccountName: 
+        default: "Human-friendly name of the AWS Account"
+      AwsAccountNumber:
+        default: "12-digit AWS account number"
+      AwsAccessKey:
+        default: "API Key for programmatic access"  
+      AwsSecretKey:
+        default: "API Secret for programmatic access"
+      Region: "AWS region where the network infrastructure will be deployed"
+      TransitCidr: "IP address space (CIDR block) allocated to the Transit Gateway"
+      Spoke1Cidr: "IP address space (CIDR block) allocated to the first Spoke Gateway"
+      Spoke2Cidr: "IP address space (CIDR block) allocated to the second Spoke Gateway"
+## Constant to always keep CloudType as AWS
+Mappings:
+  Constants:
+    CloudType:
+      Value: 1
+
+Parameters:
+  AccountName:
+    Type: String
+    Default: 'aws-acct-one'
+  Region:
+    Type: String
+    Default: 'eu-west-2'
+  AwsAccountNumber:
+    Type: String
+    Default: '241517417242'
+    NoEcho: true
+  AwsAccessKey:
+    Type: String
+    Default: 'AKIATQO4PKMNDT2YS2MO'
+  AwsSecretKey:
+    Type: String
+    NoEcho: true
+  TransitCidr:
+    Type: String
+    Default: '10.10.0.0/23'
+    Description: 'Can be any size between /16 and /23'
+  Spoke1Cidr:
+    Type: String
+    Default: '10.20.0.0/24'
+    Description: 'Make it /24 for this template'
+  Spoke2Cidr:
+    Type: String
+    Default: '10.30.0.0/24'
+    Description: 'Make it /24 for this template'
+
+
+Resources:
+  AviatrixAccount:
+#    DeletionPolicy: Retain ## Comment this line is you're willing to delete the access account from the controller
+    Type: 'TF::Aviatrix::Account'
+    Properties:
+      AccountName: !Ref AccountName
+      CloudType: !FindInMap [Constants, CloudType, Value]
+      AwsAccountNumber: !Ref AwsAccountNumber
+      AwsAccessKey: !Ref AwsAccessKey
+      AwsSecretKey: !Ref AwsSecretKey
+  
+  ControllerSecurityGroupManagement:
+    Type: 'TF::Aviatrix::ControllerSecurityGroupManagementConfig'
+    DependsOn: AviatrixAccount
+    Properties:
+      AccountName: !Ref AccountName         ## Comment these two lines dnd uncomment the line below
+      EnableSecurityGroupManagement: true   ## If you need to delete the stack, otherwise the account will not be deleted
+      #EnableSecurityGroupManagement: false 
+
+
+## Transit  
+  TrVpc:
+    Type: 'TF::Aviatrix::Vpc'
+    DependsOn: AviatrixAccount
+    Properties:
+      AccountName: !Ref AccountName
+      Region: !Ref Region
+      CloudType: !FindInMap [Constants, CloudType, Value]
+      Name: 'transit-vpc'
+      Cidr: !Ref TransitCidr
+      AviatrixTransitVpc: true
+  
+  TransitGateway:
+    Type: 'TF::Aviatrix::TransitGateway'
+    Properties:
+      AccountName: !Ref AccountName
+      CloudType: !FindInMap [Constants, CloudType, Value]
+      GwName: 'transit-euw2'
+      GwSize: 't2.small'
+      Subnet: !Select [4, !Cidr [ !Ref TransitCidr, 16, 4]] # Calculate the 5th /28 subnet based on the Transit Cidr
+      VpcId: !GetAtt TrVpc.VpcId
+      VpcReg: !Ref Region
+
+
+## Spoke 1
+  SpVpc1:
+    Type: 'TF::Aviatrix::Vpc'
+    DependsOn: AviatrixAccount
+    Properties:
+      AccountName: !Ref AccountName
+      Region: !Ref Region
+      CloudType: !FindInMap [Constants, CloudType, Value]
+      Name: 'spoke1-vpc'
+      Cidr: !Ref Spoke1Cidr
+      AviatrixTransitVpc: false
+
+  SpokeGateway1:
+    Type: 'TF::Aviatrix::SpokeGateway'
+    Properties:
+      AccountName: !Ref AccountName
+      CloudType: !FindInMap [Constants, CloudType, Value]
+      GwName: 'spoke1-euw2'
+      VpcId: !GetAtt SpVpc1.VpcId
+      GwSize: 't2.micro'
+      Subnet: !Select [4, !Cidr [ !Ref Spoke1Cidr, 16, 4]] # Calculate the 5th /28 subnet based on the Spoke Cidr 
+      VpcReg: !Ref Region
+
+## Spoke <-> Transit
+  Spoke1ToTransit:
+    DependsOn: 
+      - SpokeGateway1
+      - TransitGateway
+    Type: 'TF::Aviatrix::SpokeTransitAttachment'
+    Properties:
+      SpokeGwName: 'spoke1-euw2'
+      TransitGwName: 'transit-euw2'
+
+
+## Spoke 2
+  SpVpc2:
+    Type: 'TF::Aviatrix::Vpc'
+    DependsOn: AviatrixAccount
+    Properties:
+      AccountName: !Ref AccountName
+      Region: !Ref Region
+      CloudType: !FindInMap [Constants, CloudType, Value]
+      Name: 'spoke2-vpc'
+      Cidr: !Ref Spoke2Cidr
+      AviatrixTransitVpc: false
+
+  SpokeGateway2:
+    Type: 'TF::Aviatrix::SpokeGateway'
+    Properties:
+      AccountName: !Ref AccountName
+      CloudType: !FindInMap [Constants, CloudType, Value]
+      GwName: 'spoke2-euw2'
+      VpcId: !GetAtt SpVpc2.VpcId
+      GwSize: 't2.micro'
+      Subnet: !Select [4, !Cidr [ !Ref Spoke2Cidr, 16, 4]] # Calculate the 5th /28 subnet based on the Spoke Cidr 
+      VpcReg: !Ref Region
+
+## Spoke <-> Transit
+  Spoke2ToTransit:
+    DependsOn: 
+      - SpokeGateway2
+      - TransitGateway
+    Type: 'TF::Aviatrix::SpokeTransitAttachment'
+    Properties:
+      SpokeGwName: 'spoke2-euw2'
+      TransitGwName: 'transit-euw2'

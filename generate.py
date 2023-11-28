@@ -700,8 +700,8 @@ def generate_docs(tempdir, provider_type, tfschema, provider_data):
         provider_reference_path = (tempdir / provider_type / "docs" / "provider_reference.html.markdown").absolute()
 
     if os.path.isdir(resources_path):
-        
-        with open(Path("docs") / "{}.md".format(provider_type), 'w') as provider_readme:
+        os.makedirs("aviatrix_provider_docs", exist_ok=True)
+        with open(Path("aviatrix_provider_docs") / "README.md".format(provider_type), 'w') as provider_readme:
             readable_provider_name = provider_avx
             
             # provider info
@@ -744,28 +744,15 @@ def generate_docs(tempdir, provider_type, tfschema, provider_data):
                 except:
                     pass
             
-            # remove environmental variable references
-            # argument_text = "\n".join(arguments)
-            # sentences = argument_text.split(".")
-            # i = 0
-            # while len(sentences) > i:
-            #     if ("environment variable" in sentences[i] or "environmental variable" in sentences[i] or "Can be sourced from" in sentences[i]):
-            #         del sentences[i]
-            #     else:
-            #         i+=1
-            # argument_text = ".".join(sentences)
-            
- 
-            # has_required_arguments = False
-            # if "required" in argument_text.lower():
-            #     has_required_arguments = True
-            
-            provider_readme.write("# {} Provider\n\n".format(readable_provider_name))
+
+            provider_readme.write("# Aviatrix Provider\n\n")
             
             provider_readme.write("## Configuration\n\n")
-            provider_readme.write("To configure this resource, you must create an AWS Secrets Manager secret with the name `aviatrix_secret`. The below arguments have to be included as the key/value or JSON properties in the secret:\n")
-            provider_readme.write("`controller_ip`\n")
-            provider_readme.write("`password`\n\n")
+            provider_readme.write("To configure this resource, you must create an AWS Secrets Manager secret with the name `aviatrix_secret`. The following arguments have to be included as the key/value or JSON properties in the secret:\n\n")
+            provider_readme.write("| Argument | Description |\n")
+            provider_readme.write("| --- | --- |\n")
+            provider_readme.write("| `controller_ip` | The IP address of the Aviatrix controller |\n")
+            provider_readme.write("| `password` | The password of the `admin` user |\n")
 
             # iterate provider resources
             provider_readme.write("## Supported Resources\n\n")

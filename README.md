@@ -16,7 +16,8 @@
 ## 1. Deploy the execution environment
 
 Start by deploying the execution environment from [template.yml](https://github.com/nickda/aviatrix-cfn-types/blob/main/template.yml) to Cloudformation.
->Important: Ensure you select the correct region in the AWS Console or AWS CLI.
+>[!IMPORTANT] 
+> Ensure you select the correct region in the AWS Console or AWS CLI.
 
 ![CleanShot 2023-11-28 at 17 17 09](https://github.com/nickda/aviatrix-cfn-types/assets/10653195/41ccf740-d5d1-41e9-a251-2a80e5cd6bfd)
 
@@ -81,7 +82,7 @@ curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip
 unzip awscliv2.zip
 sudo ./aws/install
 
-## Configure AWS credentials and region to which the Cloudformation resources will be registered
+## Configure AWS credentials and the region to which the Cloudformation resources will be registered
 aws configure
 ```
 
@@ -106,7 +107,8 @@ python3 generate.py
 
 ## 5. Submit the resources to Cloudformation
 
-> Note: By default, AWS imposes a limit of 50 custom resources per account per region.
+> [!CAUTION]
+> By default, AWS imposes a limit of 50 custom resources per account per region.
 
 To submit resources one at a time:
 
@@ -126,7 +128,8 @@ To submit resources in bulk:
 python3 submit-all.py
 ```
 
->Note: To submit only a subset of resources, you can delete the folder with unneeded resources from the `resources` directory before running the submit-all.py script.
+> [!NOTE]
+> To submit only a subset of resource types, delete the folder with unneeded types from the `resources` directory before running the `submit-all.py` script.
 
 <!-- TOC --><a name="6-configuring-aviatrix-controller-ip-address-and-credentials"></a>
 

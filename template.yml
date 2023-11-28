@@ -135,7 +135,7 @@ Resources:
                 S3Key: !If
                   - S3Defined
                   - !Ref S3Key
-                  - cfn-tf-custom-types/app.zip
+                  - app.zip
             Runtime: python3.8
             MemorySize: 1024
             Timeout: 900

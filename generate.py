@@ -12,193 +12,10 @@ import tempfile
 import time
 import sys, traceback
 import multiprocessing
+import re
 from pathlib import Path
 
-
-PROVIDERS_MAP = {
-    'random': ['Random','Random'],
-    'digitalocean': ['DigitalOcean','DigitalOcean'],
-    'oci': ['OCI','Oracle Cloud Infrastructure'],
-    'aws': ['AWS','AWS'],
-    'opsgenie': ['OpsGenie','OpsGenie'],
-    'dnsimple': ['DNSimple','DNSimple'],
-    'vsphere': ['VSphere','VMware vSphere'],
-    'consul': ['Consul','Consul'],
-    'cloudstack': ['CloudStack','CloudStack'],
-    'tls': ['TLS','TLS'],
-    'azurerm': ['AzureRM','Azure'],
-    'nomad': ['Nomad','Nomad'],
-    'ovh': ['OVH','OVH'],
-    'scaleway': ['Scaleway','Scaleway'],
-    'bitbucket': ['Bitbucket','Bitbucket'],
-    'logentries': ['Logentries','Logentries'],
-    'datadog': ['Datadog','Datadog'],
-    'pagerduty': ['PagerDuty','PagerDuty'],
-    'ultradns': ['UltraDNS','UltraDNS'],
-    'profitbricks': ['ProfitBricks','ProfitBricks'],
-    'postgresql': ['PostgreSQL','PostgreSQL'],
-    'google': ['Google','Google Cloud'],
-    'dme': ['DME','DNSMadeEasy'],
-    'triton': ['Triton','Triton'],
-    'circonus': ['Circonus','Circonus'],
-    'dyn': ['Dyn','Dyn'],
-    'mailgun': ['Mailgun','Mailgun'],
-    'influxdb': ['InfluxDB','InfluxDB'],
-    'alicloud': ['Alicloud','Alicloud'],
-    'grafana': ['Grafana','Grafana'],
-    'rabbitmq': ['RabbitMQ','RabbitMQ'],
-    'arukas': ['Arukas','Arukas'],
-    'vcd': ['VCD','VMware vCloud Director'],
-    'powerdns': ['PowerDNS','PowerDNS'],
-    'atlas': ['Atlas','Atlas'],
-    'dns': ['DNS','DNS'],
-    'newrelic': ['NewRelic','NewRelic'],
-    'github': ['GitHub','GitHub'],
-    'librato': ['Librato','Librato'],
-    'openstack': ['OpenStack','OpenStack'],
-    'heroku': ['Heroku','Heroku'],
-    'packet': ['Packet','Packet'],
-    'clc': ['CLC','CenturyLinkCloud'],
-    'template': ['Template','Template'],
-    'icinga2': ['Icinga2','Icinga2'],
-    'softlayer': ['SoftLayer','SoftLayer'],
-    'spotinst': ['Spotinst','Spotinst'],
-    'cloudflare': ['Cloudflare','Cloudflare'],
-    'kubernetes': ['Kubernetes','Kubernetes'],
-    'opc': ['OPC','Oracle Public Cloud'],
-    'vault': ['Vault','Vault'],
-    'gitlab': ['Gitlab','Gitlab'],
-    'statuscake': ['StatusCake','StatusCake'],
-    'local': ['Local','Local'],
-    'ns1': ['NS1','NS1'],
-    'fastly': ['Fastly','Fastly'],
-    'docker': ['Docker','Docker'],
-    'rancher': ['Rancher','Rancher'],
-    'logicmonitor': ['LogicMonitor','LogicMonitor'],
-    'cloudscale': ['CloudScale','CloudScale'],
-    'netlify': ['Netlify','Netlify'],
-    'opentelekomcloud': ['OpenTelekomCloud','OpenTelekomCloud'],
-    'panos': ['Panos','Palo Alto Networks'],
-    'oraclepaas': ['OraclePaaS','Oracle Cloud Platform'],
-    'nsxt': ['NSXT','VMware NSX-T'],
-    'runscope': ['RunScope','RunScope'],
-    'flexibleengine': ['FlexibleEngine','FlexibleEngine'],
-    'hcloud': ['HCloud','Hetzner Cloud'],
-    'azurestack': ['AzureStack','Azure Stack'],
-    'telefonicaopencloud': ['TelefonicaOpenCloud','TelefonicaOpenCloud'],
-    'huaweicloud': ['HuaweiCloud','HuaweiCloud'],
-    'brightbox': ['Brightbox','Brightbox'],
-    'tfe': ['Tfe','Terraform Enterprise'],
-    'acme': ['ACME','ACME'],
-    'rightscale': ['RightScale','RightScale'],
-    'bigip': ['BIGIP','F5 BIG-IP'],
-    'tencentcloud': ['TencentCloud','TencentCloud'],
-    'nutanix': ['Nutanix','Nutanix'],
-    'linode': ['Linode','Linode'],
-    'selvpc': ['SelVPC','Selectel'],
-    'skytap': ['Skytap','Skytap'],
-    'hedvig': ['Hedvig','Hedvig'],
-    'ucloud': ['UCloud','UCloud'],
-    'akamai': ['Akamai','Akamai'],
-    'azuread': ['AzureAD','Azure Active Directory'],
-    'ad': ['AD','Active Directory'],
-    'archive': ['Archive','Archive'],
-    'boundary': ['Boundary','Boundary'],
-    'ciscoasa': ['CiscoASA','Cisco ASA'],
-    'cloudinit': ['Cloudinit','Cloudinit'],
-    'external': ['External','External'],
-    'google-beta': ['GoogleBeta','Google Beta'],
-    'hcp': ['HCP','HashiCorp Cloud Platform'],
-    'hcs': ['HCS','HashiCorp Consul Service'],
-    'helm': ['Helm','Helm'],
-    'http': ['HTTP','HTTP'],
-    'kubernetes-alpha': ['KubernetesAlpha','Kubernetes (Alpha)'],
-    'null': ['Null','Null'],
-    'terraform': ['Terraform','Terraform'],
-    'time': ['Time','Time'],
-    'aci': ['ACI','Cisco ACI'],
-    'ah': ['AH','AdvancedHosting Cloud'],
-    'aiven': ['Aiven','Aiven'],
-    'alkira': ['Alkira','Alkira'],
-    'amixr': ['Amixr','Amixr'],
-    'anxcloud': ['Anxcloud','Anexia Cloud'],
-    'artifactory': ['Artifactory','Artifactory'],
-    'avi': ['AVI','AVI Networks'],
-    'aviatrix': ['Aviatrix','Aviatrix'],
-    'azurecaf': ['AzureCAF','Azure Cloud Adoption Framework'],
-    'azuredevops': ['AzureDevOps','Azure DevOps'],
-    'b2': ['B2','B2'],
-    'buildkite': ['Buildkite','Buildkite'],
-    'checkly': ['Checkly','Checkly'],
-    'checkpoint': ['CheckPoint','Check Point'],
-    'civo': ['Civo','Civo'],
-    'cloudeos': ['CloudEOS','Arista CloudEOS'],
-    'cloudsigma': ['CloudSigma','CloudSigma'],
-    'cloudsmith': ['Cloudsmith','Cloudsmith'],
-    'cloudtamerio': ['Cloudtamerio','cloudtamer.io'],
-    'configcat': ['ConfigCat','ConfigCat'],
-    'constellix': ['Constellix','Constellix'],
-    'databricks': ['Databricks','Databricks'],
-    'dcnm': ['DCNM','Cisco DCNM'],
-    'dome9': ['Dome9','Dome9'],
-    'dynatrace': ['Dynatrace','Dynatrace'],
-    'ecl': ['ECL','NTT Enterprise Cloud 2.0'],
-    'equinix': ['Equinix','Equinix'],
-    'exoscale': ['Exoscale','Exoscale'],
-    'fortios': ['FortiOS','FortiOS'],
-    'gridscale': ['Gridscale','Gridscale'],
-    'ilert': ['ILert','iLert'],
-    'intersight': ['Intersight','Cisco Intersight'],
-    'ionoscloud': ['IONOSCloud','IONOS Cloud'],
-    'lacework': ['Lacework','Lacework'],
-    'launchdarkly': ['LaunchDarkly','LaunchDarkly'],
-    'limelight': ['Limelight','Limelight'],
-    'logzio': ['Logzio','Logz.io'],
-    'metal': ['Metal','Equinix Metal'],
-    'mongodbatlas': ['MongoDBAtlas','MongoDB Atlas'],
-    'mso': ['MSO','Cisco MSO'],
-    'netapp-cloudmanager': ['NetAppCloudManager','NetApp Cloud Volumes ONTAP'],
-    'netapp-elementsw': ['NetAppElementSW','NetApp ElementSW'],
-    'netapp-gcp': ['NetAppGCP','NetApp Cloud Volumes Service for Google Cloud'],
-    'nutanixkps': ['NutanixKPS','Nutanix KPS'],
-    'octopusdeploy': ['OctopusDeploy','Octopus Deploy'],
-    'okta': ['Okta','Okta'],
-    'oktaasa': ['OktaASA','Okta ASA'],
-    'onelogin': ['OneLogin','OneLogin'],
-    'onepassword': ['OnePassword','1Password'],
-    'oneview': ['OneView','HPE OneView'],
-    'opennebula': ['OpenNebula','OpenNebula'],
-    'pnap': ['PNAP','phoenixNAP'],
-    'prismacloud': ['PrismaCloud','Palo Alto Networks Prisma Cloud'],
-    'quorum': ['Quorum','Quorum'],
-    'rancher2': ['Rancher2','Rancher v2'],
-    'rediscloud': ['RedisCloud','Redis Enterprise Cloud'],
-    'rke': ['RKE','Rancher Kubernetes Engine'],
-    'rollbar': ['Rollbar','Rollbar'],
-    'sdm': ['SDM','strongDM'],
-    'sematext': ['Sematext','Sematext'],
-    'signalfx': ['SignalFx','SignalFx'],
-    'sigsci': ['SigSci','Signal Sciences'],
-    'splunk': ['Splunk','Splunk'],
-    'stackpath': ['StackPath','StackPath'],
-    'sumologic': ['SumoLogic','Sumo Logic'],
-    'thunder': ['Thunder','A10 Thunder'],
-    'transloadit': ['Transloadit','Transloadit'],
-    'turbot': ['Turbot','Turbot'],
-    'upcloud': ['UpCloud','UpCloud'],
-    'venafi': ['Venafi','Venafi'],
-    'victorops': ['VictorOps','VictorOps'],
-    'vmc': ['VMC','VMware Cloud'],
-    'volterra': ['Volterra','Volterra'],
-    'vra': ['VRA','VMware vRealize Automation'],
-    'vra7': ['VRA7','VMware vRealize Automation 7'],
-    'vultr': ['Vultr','Vultr'],
-    'wavefront': ['Wavefront','Wavefront'],
-    'zerotier': ['ZeroTier','ZeroTier']
-}
-
-
-import re
+provider_avx = 'Aviatrix'
 
 def tf_to_cfn_str(obj):
     """
@@ -226,13 +43,12 @@ def tf_type_to_cfn_type(tf_name, provider_name):
     """
     split_provider_name = tf_name.split("_")
     split_provider_name.pop(0)
-    cfn_provider_name = PROVIDERS_MAP[provider_name][0]
 
     prefix = "TF"
     if len(sys.argv) > 2:
         prefix = sys.argv[2]
 
-    return prefix + "::" + cfn_provider_name + "::" + tf_to_cfn_str("_".join(split_provider_name))
+    return prefix + "::" + provider_avx + "::" + tf_to_cfn_str("_".join(split_provider_name))
 
 
 import subprocess
@@ -408,7 +224,7 @@ def generate_empty_override(schema, definition):
 
 def process_provider(provider_type):
     """
-    Downloads the latest version of a Terraform provider and generates a CloudFormation equivalent for each resource in the provider.
+    Downloads the latest version of Aviatrix Terraform provider and generates a CloudFormation equivalent for each resource in the provider.
 
     Args:
     provider_type (str): The name of the Terraform provider to generate CloudFormation resources for.
@@ -416,7 +232,6 @@ def process_provider(provider_type):
     Returns:
     None
     """
-def process_provider(provider_type):
     tmpdir = tempfile.TemporaryDirectory()
     tempdir = Path(tmpdir.name)
 
@@ -447,7 +262,7 @@ def process_provider(provider_type):
 
     outstandingblocks = {}
     schema = {}
-    ## temporarily disabled doc generation
+    
     doc_resources = generate_docs(tempdir, provider_type, tfschema, provider_data)
 
     for k,v in tfschema['provider_schemas']["registry.terraform.io/{}".format(provider_data["data"][0]["attributes"]["full-name"].lower())]['resource_schemas'].items():
@@ -459,8 +274,8 @@ def process_provider(provider_type):
         if len(sys.argv) > 2:
             prefix = sys.argv[2]
         
-        cfntypename = prefix + "::" + PROVIDERS_MAP[provider_type][0] + "::" + endnaming
-        cfndirname = prefix + "-" + PROVIDERS_MAP[provider_type][0] + "-" + endnaming
+        cfntypename = prefix + "::" + provider_avx + "::" + endnaming
+        cfndirname = prefix + "-" + provider_avx + "-" + endnaming
 
         try:
             providerdir = Path('.') / 'resources' / provider_type / cfndirname
@@ -475,8 +290,8 @@ def process_provider(provider_type):
             schema = {
                 "typeName": cfntypename,
                 "description": "CloudFormation equivalent of {}".format(k),
-                "sourceUrl": "https://github.com/iann0036/cfn-tf-custom-types.git",
-                "documentationUrl": "https://github.com/iann0036/cfn-tf-custom-types/blob/docs/resources/{}/{}/docs/README.md".format(provider_type, cfndirname),
+                "sourceUrl": "https://github.com/nickda/aviatrix-cfn-types.git",
+                "documentationUrl": "https://github.com/nickda/aviatrix-cfn-types/blob/docs/resources/{}/{}/docs/README.md".format(provider_type, cfndirname),
                 "definitions": {},
                 "properties": {
                     "tfcfnid": {
@@ -771,7 +586,7 @@ def process_resource_docs(provider_name, file_contents, provider_readme_items, p
         if line.startswith("# " + provider_name):
             resource_type = line[2:].replace("\\", "")
             section = "description"
-        elif line.startswith("# Resource: " + provider_name): # aws docs differences
+        elif line.startswith("# Resource: " + provider_name):
             resource_type = line[len("# Resource: "):].replace("\\", "")
             section = "description"
         elif line == "## Example Usage":
@@ -844,8 +659,8 @@ def process_resource_docs(provider_name, file_contents, provider_readme_items, p
                     argument_block = argument_name
 
     if resource_type != "":
-        if provider_name not in PROVIDERS_MAP:
-            return
+        # if provider_name not in PROVIDERS_MAP:
+        #     return
         
         description = description.strip()
 
@@ -862,7 +677,7 @@ def process_resource_docs(provider_name, file_contents, provider_readme_items, p
 
 def generate_docs(tempdir, provider_type, tfschema, provider_data):
     """
-    Generates documentation for a given provider.
+    Generates documentation for the Aviatrix provider.
 
     Args:
     - tempdir (pathlib.Path): The path to the temporary directory.
@@ -884,10 +699,10 @@ def generate_docs(tempdir, provider_type, tfschema, provider_data):
         index_path = (tempdir / provider_type / "docs" / "index.md").absolute()
         provider_reference_path = (tempdir / provider_type / "docs" / "provider_reference.html.markdown").absolute()
 
-    if os.path.isdir(resources_path) and provider_type in PROVIDERS_MAP:
+    if os.path.isdir(resources_path):
         
         with open(Path("docs") / "{}.md".format(provider_type), 'w') as provider_readme:
-            readable_provider_name = PROVIDERS_MAP[provider_type][1]
+            readable_provider_name = provider_avx
             
             # provider info
             with open(index_path, 'r') as f:
@@ -930,37 +745,27 @@ def generate_docs(tempdir, provider_type, tfschema, provider_data):
                     pass
             
             # remove environmental variable references
-            argument_text = "\n".join(arguments)
-            if provider_type not in ['digitalocean', 'fastly', 'flexibleengine', 'google', 'oneandone', 'profitbricks']:
-                sentences = argument_text.split(".")
-                i = 0
-                while len(sentences) > i:
-                    if ("environment variable" in sentences[i] or "environmental variable" in sentences[i] or "Can be sourced from" in sentences[i]):
-                        del sentences[i]
-                    else:
-                        i+=1
-                argument_text = ".".join(sentences)
+            # argument_text = "\n".join(arguments)
+            # sentences = argument_text.split(".")
+            # i = 0
+            # while len(sentences) > i:
+            #     if ("environment variable" in sentences[i] or "environmental variable" in sentences[i] or "Can be sourced from" in sentences[i]):
+            #         del sentences[i]
+            #     else:
+            #         i+=1
+            # argument_text = ".".join(sentences)
             
-            # replace tf references
-            if provider_type in ['aws']:
-                argument_text = re.sub(r"(\`%s\_.+\`)" % provider_type, lambda x: "`" + tf_type_to_cfn_type(x.group(1), provider_type), argument_text) # TODO - why only one backtick used?!?
-
-            has_required_arguments = False
-            if "required" in argument_text.lower() and provider_type not in ['aws']:
-                has_required_arguments = True
+ 
+            # has_required_arguments = False
+            # if "required" in argument_text.lower():
+            #     has_required_arguments = True
             
             provider_readme.write("# {} Provider\n\n".format(readable_provider_name))
-            if provider_type == "aws":
-                provider_readme.write("> For the AWS provider, credentials will be inherited from the executor role, meaning you are not required to provide credentials in a configuration secret.\n\n")
+            
             provider_readme.write("## Configuration\n\n")
-            if len(arguments) == 0:
-                provider_readme.write("No configuration is required for this provider.\n\n")
-            elif not has_required_arguments:
-                provider_readme.write("To configure this resource, you may optionally create an AWS Secrets Manager secret with the name **terraform/{}**. The below arguments may be included as the key/value or JSON properties in the secret:\n\n".format(provider_type))
-                provider_readme.write(argument_text + "\n\n")
-            else:
-                provider_readme.write("To configure this resource, you must create an AWS Secrets Manager secret with the name **terraform/{}**. The below arguments may be included as the key/value or JSON properties in the secret:\n\n".format(provider_type))
-                provider_readme.write(argument_text + "\n\n")
+            provider_readme.write("To configure this resource, you must create an AWS Secrets Manager secret with the name `aviatrix_secret`. The below arguments have to be included as the key/value or JSON properties in the secret:\n")
+            provider_readme.write("`controller_ip`\n")
+            provider_readme.write("`password`\n\n")
 
             # iterate provider resources
             provider_readme.write("## Supported Resources\n\n")
@@ -987,7 +792,7 @@ def generate_docs(tempdir, provider_type, tfschema, provider_data):
                 if len(sys.argv) > 2:
                     prefix = sys.argv[2]
                 
-                cfn_type = prefix + "::" + PROVIDERS_MAP[provider_type][0] + "::" + endnaming
+                cfn_type = prefix + "::" + provider_avx + "::" + endnaming
                 
                 provider_readme_items.append("* [{cfn_type}](../resources/{provider_name}/{type_stub}/docs/README.md)".format(
                     cfn_type=cfn_type,
@@ -1001,7 +806,7 @@ def generate_docs(tempdir, provider_type, tfschema, provider_data):
 
     else:
         with open(Path("docs") / "{}.md".format(provider_type), 'w') as provider_readme:
-            readable_provider_name = PROVIDERS_MAP[provider_type][1]
+            readable_provider_name = provider_avx
 
             provider_readme.write("# {} Provider\n\n".format(readable_provider_name))
             provider_readme.write("## Configuration\n\n")
@@ -1023,7 +828,7 @@ def generate_docs(tempdir, provider_type, tfschema, provider_data):
                 if len(sys.argv) > 2:
                     prefix = sys.argv[2]
                 
-                cfn_type = prefix + "::" + PROVIDERS_MAP[provider_type][0] + "::" + endnaming
+                cfn_type = prefix + "::" + provider_avx + "::" + endnaming
                 
                 provider_readme_items.append("* [{cfn_type}](../resources/{provider_name}/{type_stub}/docs/README.md)".format(
                     cfn_type=cfn_type,
@@ -1040,18 +845,7 @@ def generate_docs(tempdir, provider_type, tfschema, provider_data):
 
 
 def main():
-    """
-    This function takes in a command line argument and processes the provider(s) accordingly.
-    If the argument is "all", it processes all the providers in parallel using multiprocessing.
-    Otherwise, it processes the provider specified in the argument.
-    """
-    if sys.argv[1] == "all":
-        provider_list = PROVIDERS_MAP.keys()
-        with multiprocessing.Pool(multiprocessing.cpu_count()) as p: # CPU warmer :S
-            list(p.imap_unordered(process_provider, provider_list))
-    else:
-        process_provider(sys.argv[1])
-
+    process_provider("aviatrix")
 
 if __name__ == "__main__":
     main()

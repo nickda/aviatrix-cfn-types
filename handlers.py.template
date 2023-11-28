@@ -118,7 +118,7 @@ def create_handler(
             'operationid': operationid,
         }
     except lambdaclient.exceptions.ResourceNotFoundException as e:
-        progress.message = "The execution infrastructure is not available. Read more at https://github.com/iann0036/cfn-tf-custom-types."
+        progress.message = "The execution infrastructure is not available."
         progress.status = OperationStatus.FAILED
         progress.errorCode = HandlerErrorCode.GeneralServiceException
     except Exception as e:
@@ -193,7 +193,7 @@ def update_handler(
         progress.status = OperationStatus.FAILED
         progress.errorCode = HandlerErrorCode.NotFound
     except lambdaclient.exceptions.ResourceNotFoundException as e:
-        progress.message = "The execution infrastructure is not available. Read more at https://github.com/iann0036/cfn-tf-custom-types."
+        progress.message = "The execution infrastructure is not available."
         progress.status = OperationStatus.FAILED
         progress.errorCode = HandlerErrorCode.GeneralServiceException
     except Exception as e:
@@ -270,7 +270,7 @@ def delete_handler(
         progress.status = OperationStatus.FAILED
         progress.errorCode = HandlerErrorCode.NotFound
     except lambdaclient.exceptions.ResourceNotFoundException as e:
-        progress.message = "The execution infrastructure is not available. Read more at https://github.com/iann0036/cfn-tf-custom-types."
+        progress.message = "The execution infrastructure is not available."
         progress.status = OperationStatus.FAILED
         progress.errorCode = HandlerErrorCode.GeneralServiceException
     except Exception as e:

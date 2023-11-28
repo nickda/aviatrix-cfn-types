@@ -1,30 +1,26 @@
+<!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
+
+- [Custom Cloudformation Resource types for Aviatrix](#custom-cloudformation-resource-types-for-aviatrix)
+   * [1. Deploy the execution environment](#1-deploy-the-execution-environment)
+   * [2. Install the prerequisites](#2-install-the-prerequisites)
+   * [3. Pull and Run the Lambda Python Image in Docker](#3-pull-and-run-the-lambda-python-image-in-docker)
+   * [4. Generate the Aviatrix resources and provider documentation](#4-generate-the-aviatrix-resources-and-provider-documentation)
+   * [5. Submit the resources to Cloudformation](#5-submit-the-resources-to-cloudformation)
+   * [6. Configuring Aviatrix Controller IP address and credentials](#6-configuring-aviatrix-controller-ip-address-and-credentials)
+   * [7. Deploy resources by Creating a Cloudformation template](#7-deploy-resources-by-creating-a-cloudformation-template)
+
+<!-- TOC end -->
+
+<!-- TOC --><a name="custom-cloudformation-resource-types-for-aviatrix"></a>
 # Custom Cloudformation Resource types for Aviatrix
 
+<!-- TOC --><a name="1-deploy-the-execution-environment"></a>
 ## 1. Deploy the execution environment
 
 Start by deploying the execution environment from [template.yml](https://github.com/nickda/aviatrix-cfn-types/blob/main/template.yml) to Cloudformation.
 >Important: Ensure you select the correct region in the AWS Console or AWS CLI.
 
-
-![CleanShot 2023-11-28 at 17 17 09](https://github.com/nickda/aviatrix-cfn-types/assets/10653195/8481f176-b03c-4e22-92a5-aee6f0a03ef7)
-
-### Execution environment architecture Components
-**Terraform State S3 Bucket:** An Amazon S3 bucket stores the Terraform state files. This state bucket is crucial for Terraform to track the state of resources and for ensuring idempotency in infrastructure provisioning.
-
-**Executor Lambda Function:** The core of the setup is the Executor Lambda Function, which is triggered by the creation, modification, or deletion of CloudFormation resources. The Lambda function executes Terraform code against the Aviatrix Controller API. This automation enables the management of the Aviatrix Platform's resources via Terraform while using CloudFormation as the orchestration tool.
-
-**ExecutorLambdaServiceRole:** This IAM role authorizes the Executor Lambda Function to interact with other AWS services. It has policies granting permissions to manage Terraform state in the S3 bucket and access secrets from the AWS Secrets Manager.
-
-**CloudWatch Logs:** Utilized for logging and troubleshooting, CloudWatch Logs store the output of the Executor Lambda Function, providing insights into the execution process and facilitating error analysis. The log group is configured with a retention policy of 14 days, ensuring logs are stored for an adequate period for review and compliance.
-
-**AWS Secrets Manager:** AWS Secrets Manager is employed to manage sensitive information such as the Aviatrix Controller credentials. It securely stores and retrieves database credentials, API keys, and other secrets the Lambda function needs.
-
-### Security and Compliance
-Security is a paramount aspect of this architecture. The Terraform state bucket is encrypted using AES-256 encryption, and public access is blocked to protect state files. CloudWatch Logs are secured by IAM roles, allowing only authorized entities to access log data. The AWS Secrets Manager secures sensitive data, ensuring that the Lambda function can securely access necessary credentials without exposing them in the code or logs.
-
-### Operational Flow
-The operational flow begins with a change in the CloudFormation stack, which triggers the Executor Lambda Function. The Lambda function runs Terraform commands to create, update, or delete resources in the Aviatrix Platform as the Terraform code specifies. The function also interacts with the S3 bucket to retrieve and update the Terraform state. Logs generated during this process are sent to CloudWatch for monitoring and troubleshooting.
-
+<!-- TOC --><a name="2-install-the-prerequisites"></a>
 ## 2. Install the prerequisites
 
 The following prerequisites are required to generate Cloudformation resource types from Aviatrix Terraform provider:
@@ -35,7 +31,7 @@ The following prerequisites are required to generate Cloudformation resource typ
 - Terraform 1.0+
 - CloudFormation CLI with Python Plugin
 
-### Example of prerequisite installation on Amazon Linux instance:
+Example of installation on Amazon Linux instance:
 
 ```sh
 ## Install the prerequisites
@@ -68,13 +64,13 @@ sudo ./aws/install
 aws configure
 ```
 
+<!-- TOC --><a name="3-pull-and-run-the-lambda-python-image-in-docker"></a>
 ## 3. Pull and Run the Lambda Python Image in Docker
 
-```sh
 docker pull public.ecr.aws/lambda/python:3.9
 docker run -d -p 9000:8080 public.ecr.aws/lambda/python:3.9 app
-```
 
+<!-- TOC --><a name="4-generate-the-aviatrix-resources-and-provider-documentation"></a>
 ## 4. Generate the Aviatrix resources and provider documentation
 
 To generate resources based on the latest version of Terraform provider:
@@ -83,6 +79,7 @@ To generate resources based on the latest version of Terraform provider:
 python3 generate.py
 ```
 
+<!-- TOC --><a name="5-submit-the-resources-to-cloudformation"></a>
 ## 5. Submit the resources to Cloudformation
 
 > Note: By default, AWS imposes a limit of 50 custom resources per account per region.
@@ -92,8 +89,6 @@ To submit resources one at a time:
 ```sh
 python3 submit <resource-name>
 ```
-You have to specify the resource names in the Cloudformation resource format (TF::Aviatrix:Resource).
-To find the list of available resources check the generated documentation or the `resources` folder. (these folders are generated in step 4)
 
 e.g.,
 
@@ -109,6 +104,7 @@ python3 submit-all.py
 
 >Note: To submit only a subset of resources, you can delete the folder with unneeded resources from the `resources` directory before running the submit-all.py script.
 
+<!-- TOC --><a name="6-configuring-aviatrix-controller-ip-address-and-credentials"></a>
 ## 6. Configuring Aviatrix Controller IP address and credentials
 
 To configure this resource, you must create an AWS Secrets Manager secret named `aviatrix_secret`.
@@ -120,6 +116,7 @@ The following arguments must be included as the key/value or JSON properties in 
 | `controller_ip` | The IP address of the Aviatrix controller |
 | `password` | The password of the `admin` user |
 
+<!-- TOC --><a name="7-deploy-resources-by-creating-a-cloudformation-template"></a>
 ## 7. Deploy resources by Creating a Cloudformation template
 
 You can find an example of Controller configuration and network infrastructure deployment template in the [cfn_template_examples](https://github.com/nickda/aviatrix-cfn-types/tree/main/cfn_template_examples) directory.

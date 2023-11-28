@@ -1,6 +1,6 @@
-<!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
+# Custom Cloudformation Resource types for Aviatrix
 
-- [Custom Cloudformation Resource types for Aviatrix](#custom-cloudformation-resource-types-for-aviatrix)
+<!-- TOC start  -->
    * [1. Deploy the execution environment](#1-deploy-the-execution-environment)
    * [2. Install the prerequisites](#2-install-the-prerequisites)
    * [3. Pull and Run the Lambda Python Image in Docker](#3-pull-and-run-the-lambda-python-image-in-docker)
@@ -11,8 +11,7 @@
 
 <!-- TOC end -->
 
-<!-- TOC --><a name="custom-cloudformation-resource-types-for-aviatrix"></a>
-# Custom Cloudformation Resource types for Aviatrix
+
 
 <!-- TOC --><a name="1-deploy-the-execution-environment"></a>
 ## 1. Deploy the execution environment

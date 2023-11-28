@@ -54,6 +54,7 @@ docker pull public.ecr.aws/lambda/python:3.9
 docker run -d -p 9000:8080 public.ecr.aws/lambda/python:3.9 app
 
 ## 4. Generate the Aviatrix resources and provider documentation
+
 To generate resources based on the latest version of Terraform provider:
 
 ```sh

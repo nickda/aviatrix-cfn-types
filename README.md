@@ -19,6 +19,29 @@
 Start by deploying the execution environment from [template.yml](https://github.com/nickda/aviatrix-cfn-types/blob/main/template.yml) to Cloudformation.
 >Important: Ensure you select the correct region in the AWS Console or AWS CLI.
 
+![CleanShot 2023-11-28 at 17 17 09](https://github.com/nickda/aviatrix-cfn-types/assets/10653195/41ccf740-d5d1-41e9-a251-2a80e5cd6bfd)
+
+
+### Architecture Components
+Terraform State S3 Bucket: An Amazon S3 bucket stores the Terraform state files. This state bucket is crucial for Terraform to track the state of resources and for ensuring idempotency in infrastructure provisioning.
+
+**Executor Lambda Function:** The core of the setup is the Executor Lambda Function, which is triggered by the creation, modification, or deletion of CloudFormation resources. The Lambda function executes Terraform code against the Aviatrix Controller API. This automation enables the management of the Aviatrix Platform's resources via Terraform while using CloudFormation as the orchestration tool.
+
+**ExecutorLambdaServiceRole:** This IAM role authorizes the Executor Lambda Function to interact with other AWS services. It has policies granting permissions to manage Terraform state in the S3 bucket and access secrets from the AWS Secrets Manager.
+
+**CloudWatch Logs:** Utilized for logging and troubleshooting, CloudWatch Logs store the output of the Executor Lambda Function, providing insights into the execution process and facilitating error analysis. The log group is configured with a retention policy of 14 days, ensuring logs are stored for an adequate period for review and compliance.
+
+**AWS Secrets Manager:** AWS Secrets Manager is employed to manage sensitive information such as the Aviatrix Controller credentials. It securely stores and retrieves database credentials, API keys, and other secrets the Lambda function needs.
+
+### Security and Compliance
+Security is a paramount aspect of this architecture. The Terraform state bucket is encrypted using AES-256 encryption, and public access is blocked to protect state files. CloudWatch Logs are secured by IAM roles, allowing only authorized entities to access log data. The AWS Secrets Manager secures sensitive data, ensuring that the Lambda function can securely access necessary credentials without exposing them in the code or logs.
+
+### Operational Flow
+The operational flow begins with a change in the CloudFormation stack, which triggers the Executor Lambda Function. The Lambda function runs Terraform commands to create, update, or delete resources in the Aviatrix Platform as the Terraform code specifies. The function also interacts with the S3 bucket to retrieve and update the Terraform state. Logs generated during this process are sent to CloudWatch for monitoring and troubleshooting.
+
+
+
+
 <!-- TOC --><a name="2-install-the-prerequisites"></a>
 ## 2. Install the prerequisites
 

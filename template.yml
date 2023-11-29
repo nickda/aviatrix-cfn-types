@@ -6,7 +6,7 @@ Parameters:
     AllowAWSActions:
         Description: If true, AWS actions will be permitted to execute through an administrative role (required for TF::AWS::* resources)
         Type: String
-        Default: 'true'
+        Default: 'false'
         AllowedValues:
           - "true"
           - "false"
@@ -47,6 +47,34 @@ Mappings:
             bucketname: aviatrix-cfn-types
         eu-west-1:
             bucketname: aviatrix-cfn-types-eu-west-1
+        eu-central-1:
+            bucketname: aviatrix-cfn-types-eu-central-1
+        us-east-1:
+            bucketname: aviatrix-cfn-types-us-east-1
+        us-east-2:
+            bucketname: aviatrix-cfn-types-us-east-2
+        us-west-1:
+            bucketname: aviatrix-cfn-types-us-west-1
+        us-west-2:
+            bucketname: aviatrix-cfn-types-us-west-2
+        ca-central-1:
+            bucketname: aviatrix-cfn-types-ca-central-1
+        eu-west-3:
+            bucketname: aviatrix-cfn-types-eu-west-3
+        eu-north-1:
+            bucketname: aviatrix-cfn-types-eu-north-1
+        ap-south-1:
+            bucketname: aviatrix-cfn-types-ap-south-1
+        ap-southeast-1:
+            bucketname: aviatrix-cfn-types-ap-southeast-1
+        ap-southeast-2:
+            bucketname: aviatrix-cfn-types-ap-southeast-2
+        ap-northeast-1:
+            bucketname: aviatrix-cfn-types-ap-northeast-1
+        ap-northeast-2:
+            bucketname: aviatrix-cfn-types-ap-northeast-2
+        sa-east-1:
+            bucketname: aviatrix-cfn-types-sa-east-1
 
 Conditions:
     S3Defined: !Not [ !Equals [ '', !Ref S3Bucket ] ]

@@ -5,3 +5,4 @@ rpdk.log
 resources/
 *.yml.dot
 app/
+_utils/

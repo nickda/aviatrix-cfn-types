@@ -44,7 +44,7 @@ Metadata:
 Mappings:
     RegionMap:
         eu-west-2:
-            bucketname: aviatrix-cfn-types
+            bucketname: aviatrix-cfn-types-eu-west-2
         eu-west-1:
             bucketname: aviatrix-cfn-types-eu-west-1
         eu-central-1:

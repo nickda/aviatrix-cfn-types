@@ -56,6 +56,10 @@ The following prerequisites are required to generate Cloudformation resource typ
 ### Example of installation on the Amazon Linux
 
 ```sh
+## Clone this repository to a local directory
+git clone git@github.com:nickda/aviatrix-cfn-types.git
+cd ./aviatrix-cfn-types
+
 ## Install the prerequisites
 sudo yum update
 sudo yum install python3

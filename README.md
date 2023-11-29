@@ -150,3 +150,13 @@ The following arguments must be included as the key/value or JSON properties in 
 ## 7. Deploy resources by creating a Cloudformation template
 
 You can find an example of Controller configuration and network infrastructure deployment template in the [cfn_template_examples](https://github.com/nickda/aviatrix-cfn-types/tree/main/cfn_template_examples) directory.
+
+
+## 8. (Optional) De-registering the resource types from AWS Cloudformation
+If you require to deregister the resource types submitted to AWS Cloudformation you can run the following command:
+
+```sh
+python3 deregister-all.py
+```
+
+This will remove all custom Cloudformation resources submitted in step 5.

@@ -110,7 +110,7 @@ python3 generate.py
 ## 5. Submit the resources to Cloudformation
 
 > [!CAUTION]
-> By default, AWS imposes a limit of 50 custom resources per account per region.
+> By default, AWS imposes a limit of 50 custom resources per account per region. You can open a support case with AWS to increase the limit.
 
 To submit resources one at a time:
 
@@ -131,7 +131,7 @@ python3 submit-all.py
 ```
 
 > [!NOTE]
-> To submit only a subset of resource types, delete the folder with unneeded types from the `resources` directory before running the `submit-all.py` script.
+> To submit only a subset of resource types, delete the directories with the types you won't need from the `resources` directory before running the `submit-all.py` script.
 
 <!-- TOC --><a name="6-configuring-aviatrix-controller-ip-address-and-credentials"></a>
 

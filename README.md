@@ -23,7 +23,7 @@ Start by deploying the execution environment from [template.yml](https://github.
 
 ### Architecture Components
 
-Terraform State S3 Bucket: An Amazon S3 bucket stores the Terraform state files. This state bucket is crucial for Terraform to track the state of resources and for ensuring idempotency in infrastructure provisioning.
+**Terraform State S3 Bucket:** An Amazon S3 bucket stores the Terraform state files. This state bucket is crucial for Terraform to track the state of resources and for ensuring idempotency in infrastructure provisioning.
 
 **Executor Lambda Function:** The core of the setup is the Executor Lambda Function, which is triggered by the creation, modification, or deletion of CloudFormation resources. The Lambda function executes Terraform code against the Aviatrix Controller API. This automation enables the management of the Aviatrix Platform's resources via Terraform while using CloudFormation as the orchestration tool.
 

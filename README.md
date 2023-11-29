@@ -21,7 +21,7 @@ Start by deploying the execution environment from [template.yml](https://github.
 
 ![CleanShot 2023-11-28 at 17 17 09](https://github.com/nickda/aviatrix-cfn-types/assets/10653195/41ccf740-d5d1-41e9-a251-2a80e5cd6bfd)
 
-### Architecture Components
+### Architecture components
 
 Terraform State S3 Bucket: An Amazon S3 bucket stores the Terraform state files. This state bucket is crucial for Terraform to track the state of resources and for ensuring idempotency in infrastructure provisioning.
 
@@ -33,11 +33,11 @@ Terraform State S3 Bucket: An Amazon S3 bucket stores the Terraform state files.
 
 **AWS Secrets Manager:** AWS Secrets Manager is employed to manage sensitive information such as the Aviatrix Controller credentials. It securely stores and retrieves database credentials, API keys, and other secrets the Lambda function needs.
 
-### Security and Compliance
+### Security and compliance
 
 Security is a paramount aspect of this architecture. The Terraform state bucket is encrypted using AES-256 encryption, and public access is blocked to protect state files. CloudWatch Logs are secured by IAM roles, allowing only authorized entities to access log data. The AWS Secrets Manager secures sensitive data, ensuring that the Lambda function can securely access necessary credentials without exposing them in the code or logs.
 
-### Operational Flow
+### Operational clow
 
 The operational flow begins with a change in the CloudFormation stack, which triggers the Executor Lambda Function. The Lambda function runs Terraform commands to create, update, or delete resources in the Aviatrix Platform as the Terraform code specifies. The function also interacts with the S3 bucket to retrieve and update the Terraform state. Logs generated during this process are sent to CloudWatch for monitoring and troubleshooting.
 
@@ -97,7 +97,7 @@ docker run -d -p 9000:8080 public.ecr.aws/lambda/python:3.9 app
 
 <!-- TOC --><a name="4-generate-the-aviatrix-resources-and-provider-documentation"></a>
 
-## 4. Generate the Aviatrix resources and provider documentation
+## 4. Generate the Aviatrix resources and documentation
 
 To generate resources based on the latest version of Terraform provider:
 
@@ -107,7 +107,7 @@ python3 generate.py
 
 <!-- TOC --><a name="5-submit-the-resources-to-cloudformation"></a>
 
-## 5. Submit the resources to Cloudformation
+## 5. Submit the resources to AWS Cloudformation
 
 > [!CAUTION]
 > By default, AWS imposes a limit of 50 custom resources per account per region. You can open a support case with AWS to increase the limit.
@@ -148,6 +148,6 @@ The following arguments must be included as the key/value or JSON properties in 
 
 <!-- TOC --><a name="7-deploy-resources-by-creating-a-cloudformation-template"></a>
 
-## 7. Deploy resources by Creating a Cloudformation template
+## 7. Deploy resources by creating a Cloudformation template
 
 You can find an example of Controller configuration and network infrastructure deployment template in the [cfn_template_examples](https://github.com/nickda/aviatrix-cfn-types/tree/main/cfn_template_examples) directory.

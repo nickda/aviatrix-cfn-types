@@ -1,13 +1,13 @@
 # Custom Cloudformation Resource Types for Aviatrix
 
 <!-- TOC start  -->
-[1. Deploy the execution environment](#1-deploy-the-execution-environment)
-[2. Install the prerequisites](#2-install-the-prerequisites)
-[3. Pull and run the Lambda Python image in Docker](#3-pull-and-run-the-lambda-python-image-in-docker)
-[4. Generate the Aviatrix resources and provider documentation](#4-generate-the-aviatrix-resources-and-provider-documentation)
-[5. Submit the resources to AWS Cloudformation](#5-submit-the-resources-to-cloudformation)
-[6. Configuring Aviatrix Controller IP address and credentials](#6-configuring-aviatrix-controller-ip-address-and-credentials)
-[7. Deploy resources by creating a Cloudformation template](#7-deploy-resources-by-creating-a-cloudformation-template)
+- [1. Deploy the execution environment](#1-deploy-the-execution-environment)
+- [2. Install the prerequisites](#2-install-the-prerequisites)
+- [3. Pull and run the Lambda Python image in Docker](#3-pull-and-run-the-lambda-python-image-in-docker)
+- [4. Generate the Aviatrix resources and provider documentation](#4-generate-the-aviatrix-resources-and-provider-documentation)
+- [5. Submit the resources to AWS Cloudformation](#5-submit-the-resources-to-cloudformation)
+- [6. Configuring Aviatrix Controller IP address and credentials](#6-configuring-aviatrix-controller-ip-address-and-credentials)
+- [7. Deploy resources by creating a Cloudformation template](#7-deploy-resources-by-creating-a-cloudformation-template)
 
 <!-- TOC end -->
 

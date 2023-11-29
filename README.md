@@ -90,8 +90,10 @@ aws configure
 
 ## 3. Pull and Run the Lambda Python Image in Docker
 
+```sh
 docker pull public.ecr.aws/lambda/python:3.9
 docker run -d -p 9000:8080 public.ecr.aws/lambda/python:3.9 app
+```
 
 <!-- TOC --><a name="4-generate-the-aviatrix-resources-and-provider-documentation"></a>
 

@@ -124,14 +124,14 @@ e.g.,
 python3 submit TF::Aviatrix::Account
 ```
 
-To submit resources in bulk:
+To submit all generated resource types (in the `resources` folder) in bulk:
 
 ```sh
 python3 submit-all.py
 ```
 
 > [!NOTE]
-> To submit only a subset of resource types, delete the directories with the types you won't need from the `resources` directory before running the `submit-all.py` script.
+> If you'd like to submit only a subset of resource types, delete the directories with the types you won't need from the `resources` directory before running the `submit-all.py` script.
 
 <!-- TOC --><a name="6-configuring-aviatrix-controller-ip-address-and-credentials"></a>
 

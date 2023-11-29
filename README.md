@@ -64,7 +64,6 @@ sudo yum install docker
 sudo service docker start
 sudo usermod -a -G docker ec2-user
 sudo yum install unzip
-sudo yum -y install terraform
 sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
 sudo yum -y install terraform
 sudo yum install python3-pip

@@ -33,6 +33,7 @@ Metadata:
       TransitCidr: "IP address space (CIDR block) allocated to the Transit Gateway"
       Spoke1Cidr: "IP address space (CIDR block) allocated to the first Spoke Gateway"
       Spoke2Cidr: "IP address space (CIDR block) allocated to the second Spoke Gateway"
+
 ## Constant to always keep CloudType as AWS
 Mappings:
   Constants:
@@ -48,11 +49,9 @@ Parameters:
     Default: 'eu-west-2'
   AwsAccountNumber:
     Type: String
-    Default: '241517417242'
     NoEcho: true
   AwsAccessKey:
     Type: String
-    Default: 'AKIATQO4PKMNDT2YS2MO'
   AwsSecretKey:
     Type: String
     NoEcho: true

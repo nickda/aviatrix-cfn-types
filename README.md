@@ -53,7 +53,7 @@ The following prerequisites are required to generate Cloudformation resource typ
 - Terraform 1.0+
 - CloudFormation CLI with Python Plugin
 
-### Example of installation on Amazon Linux instance:
+### Example of installation on the Amazon Linux
 
 ```sh
 ## Install the prerequisites

@@ -1,4 +1,4 @@
-# Custom Cloudformation Resource Types for Aviatrix
+# Custom AWS Cloudformation Resource Types for Aviatrix
 
 <!-- TOC start  -->
 - [1. Deploy the execution environment](#1-deploy-the-execution-environment)

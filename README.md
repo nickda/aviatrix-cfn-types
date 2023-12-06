@@ -11,6 +11,8 @@
 
 <!-- TOC end -->
 
+This repository provides the code and guide for deploying custom Aviatrix resources using AWS CloudFormation.
+
 <!-- TOC --><a name="1-deploy-the-execution-environment"></a>
 
 ## 1. Deploy the execution environment

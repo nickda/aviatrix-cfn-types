@@ -19,7 +19,7 @@ This repository provides the code and guide for deploying custom Aviatrix resour
 
 Start by deploying the execution environment from [template.yml](https://github.com/nickda/aviatrix-cfn-types/blob/main/template.yml) to Cloudformation.
 >[!IMPORTANT] 
-> Ensure you select the correct region in the AWS Console or AWS CLI.
+> Select the region where the Aviatrix control plane is deployed in the AWS Console or AWS CLI.
 
 ![CleanShot 2023-11-28 at 17 17 09](https://github.com/nickda/aviatrix-cfn-types/assets/10653195/41ccf740-d5d1-41e9-a251-2a80e5cd6bfd)
 

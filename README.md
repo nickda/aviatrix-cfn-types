@@ -15,6 +15,11 @@ This repository provides the code and guide for deploying custom Aviatrix resour
 
 <!-- TOC --><a name="1-deploy-the-execution-environment"></a>
 
+## Prerequisites
+
+The Aviatrix controller should be deployed before creating the network infrastructure.
+If you're starting from scratch, you can use [example-avx-controller-deployment.yaml](https://github.com/nickda/aviatrix-cfn-types/blob/main/cfn_template_examples/example-avx-controller-deployment.yaml) to deploy the controller.
+
 ## 1. Deploy the execution environment
 
 Start by deploying the execution environment from [template.yml](https://github.com/nickda/aviatrix-cfn-types/blob/main/template.yml) to Cloudformation.
